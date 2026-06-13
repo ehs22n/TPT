@@ -1,18 +1,11 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
-}
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  color: #172033;
+  background-color: #f4f6fb;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,96 +14,179 @@
   -webkit-text-size-adjust: 100%;
 }
 
-.container {
+* {
+  box-sizing: border-box;
+}
+
+body {
   margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  min-width: 320px;
+  min-height: 100vh;
 }
 
 button {
   cursor: pointer;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
-input,
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.sidebar {
+  width: 240px;
+  flex: 0 0 240px;
+  border-right: 1px solid #dce2ee;
+  background-color: #ffffff;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.center-panel {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.hint {
+  max-width: 420px;
+  margin: 0;
+  color: #64748b;
+}
+
+button,
+.path {
+  width: min(100%, 520px);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: border-color 0.25s, background-color 0.25s, transform 0.15s;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
 button {
-  outline: none;
+  color: #ffffff;
+  background-color: #2563eb;
 }
 
-#greet-input {
-  margin-right: 5px;
+button:hover:not(:disabled) {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.path {
+  color: #334155;
+  background-color: #ffffff;
+  border-color: #dce2ee;
+  box-shadow: none;
+  text-align: right;
+}
+
+.path span {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  direction: ltr;
+  text-align: left;
+  color: #0f172a;
+}
+
+.path.error {
+  color: #991b1b;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.path.success {
+  color: #166534;
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    width: 72px;
+    flex-basis: 72px;
+  }
+
+  .center-panel {
+    padding: 24px 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
+    color: #e5e7eb;
+    background-color: #111827;
   }
 
-  a:hover {
-    color: #24c8db;
+  .sidebar {
+    border-right-color: #263244;
+    background-color: #0f172a;
   }
 
-  input,
+  .hint {
+    color: #94a3b8;
+  }
+
   button {
     color: #ffffff;
-    background-color: #0f0f0f98;
+    background-color: #2563eb;
   }
-  button:active {
-    background-color: #0f0f0f69;
+
+  button:hover:not(:disabled) {
+    background-color: #3b82f6;
+  }
+
+  .path {
+    color: #cbd5e1;
+    background-color: #1f2937;
+    border-color: #334155;
+  }
+
+  .path span {
+    color: #f8fafc;
+  }
+
+  .path.error {
+    color: #fecaca;
+    background-color: #451a1a;
+    border-color: #7f1d1d;
+  }
+
+  .path.success {
+    color: #bbf7d0;
+    background-color: #14532d;
+    border-color: #166534;
   }
 }

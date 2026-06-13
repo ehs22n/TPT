@@ -5,6 +5,7 @@ use std::path::Path;
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![convert_srt_to_txt])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
