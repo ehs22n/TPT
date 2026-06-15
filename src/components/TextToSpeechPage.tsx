@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Button, SelectBox, TextArea } from "./shared";
 
 export default function TextToSpeechPage() {
   const [text, setText] = useState("");
@@ -23,9 +24,7 @@ export default function TextToSpeechPage() {
     loadVoices();
     window.speechSynthesis?.addEventListener?.("voiceschanged", loadVoices);
 
-    if (!("speechSynthesis" in window)) {
-      setMessage("این مرورگر از تبدیل متن به صوت پشتیبانی نمی‌کند.");
-    }
+
 
     return () => {
       window.speechSynthesis?.removeEventListener?.("voiceschanged", loadVoices);
@@ -33,10 +32,6 @@ export default function TextToSpeechPage() {
   }, [loadVoices]);
 
   function handleSpeak() {
-    if (!("speechSynthesis" in window)) {
-      setMessage("این مرورگر از تبدیل متن به صوت پشتیبانی نمی‌کند.");
-      return;
-    }
 
     if (!text.trim()) {
       setMessage("لطفاً متن را وارد کنید.");
@@ -85,38 +80,30 @@ export default function TextToSpeechPage() {
         <label htmlFor="speech-text" className="text-[var(--color-text-secondary)] font-[800]">
           متن برای تبدیل به صوت
         </label>
-        <textarea
+        <TextArea
           id="speech-text"
-          className="min-h-0 w-full resize-none rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[12px] py-[12px] leading-[1.7] text-[var(--color-text)] outline-none focus:border-[var(--color-border-strong)]"
           placeholder="متن خود را اینجا وارد کنید..."
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
-        <select
-          className="min-h-[42px] w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[12px] py-0 text-[var(--color-text)] outline-none focus:border-[var(--color-border-strong)]"
+        <SelectBox
+          className="min-h-[42px]"
           value={selectedVoice}
-          onChange={(e) => setSelectedVoice(e.target.value)}
-        >
-          {voices.length === 0 && <option value="">بدون صدای آماده</option>}
-          {voices.map((voice) => (
-            <option key={`${voice.name}-${voice.lang}`} value={voice.name}>
-              {voice.name}
-            </option>
-          ))}
-        </select>
+          options={voices.length ? voices.map((voice) => ({ value: voice.name, label: voice.name })) : [{ value: "", label: "بدون صدای آماده", disabled: true }]}
+          placeholder="انتخاب صدا"
+          onChange={(value) => setSelectedVoice(value)}
+        />
 
-        <div className="relative z-10 flex flex-wrap gap-[10px] max-[760px]:w-full">
-          <button type="button" className="inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-3)] px-[16px] py-[10px] text-white font-[800] transition-[transform,border-color,background-color] duration-[120ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:[&:not(:disabled)]:border-[var(--color-border-strong)] disabled:opacity-[0.55] max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleSpeak} disabled={speaking}>
+        <div className="relative z-10 flex mt-3 flex-wrap gap-[10px] max-[760px]:w-full">
+          <Button type="button" variant="primary" className="max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleSpeak} disabled={speaking}>
             <span>{speaking ? "در حال خواندن..." : "خواندن متن"}</span>
-          </button>
+          </Button>
 
-          <button type="button" className="inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[16px] py-[10px] text-[var(--color-text)] font-[800] transition-[transform,border-color,background-color] duration-[120ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:[&:not(:disabled)]:border-[var(--color-border-strong)] disabled:opacity-[0.55] max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleStop} disabled={!speaking}>
+          <Button type="button" variant="secondary" className="max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleStop} disabled={!speaking}>
             <span>توقف</span>
-          </button>
+          </Button>
         </div>
-
-        {message && <p className="m-0 rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[12px] py-[10px] text-[0.8rem] text-[var(--color-text-secondary)]">{message}</p>}
       </div>
     </section>
   );

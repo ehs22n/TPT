@@ -136,7 +136,7 @@ function App() {
       const items = e.dataTransfer.files;
       if (!items || items.length === 0) return;
 
-      const firstItem = items[0];
+      const firstItem = items[0] as File & { path?: string; webkitRelativePath?: string };
       const filePath = firstItem.path || firstItem.webkitRelativePath;
 
       if (!filePath) {

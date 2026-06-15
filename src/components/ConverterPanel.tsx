@@ -1,4 +1,5 @@
 import { BiCloudUpload } from "react-icons/bi";
+import { Button } from "./shared";
 import type { ConverterPanelProps } from "../types";
 
 export default function ConverterPanel({
@@ -41,7 +42,7 @@ export default function ConverterPanel({
         </div>
 
         <div className="relative z-10 flex flex-wrap gap-[10px] max-[760px]:w-full">
-          <button type="button" className="inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-3)] px-[16px] py-[10px] text-[var(--color-text)] font-[800] transition-[transform,border-color,background-color] duration-[120ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:[&:not(:disabled)]:border-[var(--color-border-strong)] disabled:opacity-[0.55] max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={onSelectFolder} disabled={loading}>
+          <Button type="button" variant="primary" className="max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={onSelectFolder} disabled={loading}>
             {loading ? (
               <>
                 <span className="h-4 w-4 animate-[spin_0.7s_linear_infinite] rounded-full border-2 border-white/28 border-t-white" />
@@ -50,12 +51,12 @@ export default function ConverterPanel({
             ) : (
               <span>انتخاب پوشه</span>
             )}
-          </button>
+          </Button>
 
           {outputPath && (
-            <button type="button" className="inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[16px] py-[10px] text-[var(--color-text)] font-[800] transition-[transform,border-color,background-color] duration-[120ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:[&:not(:disabled)]:border-[var(--color-border-strong)] disabled:opacity-[0.55] max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={onOpenOutput}>
+            <Button type="button" variant="secondary" className="max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={onOpenOutput}>
               <span>باز کردن خروجی</span>
-            </button>
+            </Button>
           )}
         </div>
 

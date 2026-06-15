@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { MenuIcon } from "./AppLayout";
+import { Button, SelectBox } from "./shared";
 import type { AiPageProps } from "../types";
 
 export default function AiPage({ aiLogs }: AiPageProps) {
@@ -57,22 +58,21 @@ export default function AiPage({ aiLogs }: AiPageProps) {
           انتخاب مدل
         </label>
 
-        <select id="ai-model" className="min-h-[42px] w-full rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[12px] py-0 text-[var(--color-text)] outline-none focus:border-[var(--color-border-strong)]" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
-          {models.map((model) => (
-            <option key={model.value} value={model.value}>
-              {model.label}
-            </option>
-          ))}
-        </select>
+        <SelectBox
+          id="ai-model"
+          value={selectedModel}
+          options={models}
+          onChange={(value) => setSelectedModel(value)}
+        />
 
         <div className="relative z-10 mt-[2px] flex flex-wrap gap-[10px] max-[760px]:w-full">
-          <button type="button" className="inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-3)] px-[16px] py-[10px] text-white font-[800] transition-[transform,border-color,background-color] duration-[120ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:[&:not(:disabled)]:border-[var(--color-border-strong)] disabled:opacity-[0.55] max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleInstall} disabled={Boolean(busy)}>
+          <Button type="button" variant="primary" className="max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleInstall} disabled={Boolean(busy)}>
             {busy === "install" ? "در حال دانلود..." : "دانلود مدل"}
-          </button>
+          </Button>
 
-          <button type="button" className="inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[7px] border border-[var(--color-border)] bg-[var(--color-panel-2)] px-[16px] py-[10px] text-[var(--color-text)] font-[800] transition-[transform,border-color,background-color] duration-[120ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:[&:not(:disabled)]:border-[var(--color-border-strong)] disabled:opacity-[0.55] max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleStart} disabled={Boolean(busy)}>
+          <Button type="button" variant="secondary" className="max-[900px]:flex-[1_1_auto] max-[760px]:flex-[1_1_100%]" onClick={handleStart} disabled={Boolean(busy)}>
             راه‌اندازی FastAPI
-          </button>
+          </Button>
         </div>
 
         <div className="grid gap-[6px] overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-panel-2)] p-[14px]">
