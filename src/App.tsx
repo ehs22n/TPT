@@ -9,8 +9,10 @@ import PageShell from "./components/PageShell";
 import ConverterPanel from "./components/ConverterPanel";
 import AiPage from "./components/AiPage";
 import TextToSpeechPage from "./components/TextToSpeechPage";
+import type { AppPageId, MenuItem, Stats, ThemeMode } from "./types";
+import type { DragEvent } from "react";
 
-const menuItems = [
+const menuItems: MenuItem[] = [
   {
     id: "home",
     title: "داشبورد",
@@ -39,22 +41,22 @@ const menuItems = [
 ];
 
 function App() {
-  const [page, setPage] = useState("home");
-  const [theme, setTheme] = useState("dark");
+  const [page, setPage] = useState<AppPageId>("home");
+  const [theme, setTheme] = useState<ThemeMode>("dark");
   const [selectedFolder, setSelectedFolder] = useState("");
   const [outputPath, setOutputPath] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [aiLogs, setAiLogs] = useState([]);
+  const [aiLogs, setAiLogs] = useState<string[]>([]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   useEffect(() => {
-    let unlisten;
+    let unlisten: (() => void) | undefined;
 
     listen("ai-log", (event) => {
       setAiLogs((current) => [...current.slice(-40), String(event.payload)]);
@@ -67,16 +69,16 @@ function App() {
     };
   }, []);
 
-  async function handleSelectFolder() {
+  async function handleSelectFolder(): Promise<void> {
     setError("");
     setOutputPath("");
     setStats(null);
 
-    const selected = await open({
+    const selected = (await open({
       directory: true,
       multiple: false,
       title: "انتخاب پوشه فایل‌های SRT",
-    });
+    })) as string | string[];
 
     if (!selected || Array.isArray(selected)) {
       return;
@@ -86,14 +88,14 @@ function App() {
     setSelectedFolder(selected);
   }
 
-  async function processFolder(folderPath) {
+  async function processFolder(folderPath: string): Promise<void> {
     setLoading(true);
     setError("");
     setOutputPath("");
     setStats(null);
 
     try {
-      const result = await invoke("convert_srt_to_txt", { path: folderPath });
+      const result = await invoke<string>("convert_srt_to_txt", { path: folderPath });
       setOutputPath(result);
 
       const baseDir = folderPath.replace(/\\/g, "/").split("/").pop() || folderPath;
@@ -109,7 +111,7 @@ function App() {
   }
 
   const handleDragOver = useCallback(
-    (e) => {
+    (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
       if (!loading) setIsDragging(true);
@@ -117,14 +119,14 @@ function App() {
     [loading]
   );
 
-  const handleDragLeave = useCallback((e) => {
+  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   }, []);
 
   const handleDrop = useCallback(
-    async (e) => {
+    async (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
@@ -154,7 +156,7 @@ function App() {
     [loading]
   );
 
-  async function handleOpenOutput() {
+  async function handleOpenOutput(): Promise<void> {
     if (!outputPath) return;
     try {
       await invoke("open_output_folder", { path: outputPath });
@@ -163,7 +165,7 @@ function App() {
     }
   }
 
-  const getFileName = (fullPath) => {
+  const getFileName = (fullPath: string): string => {
     const cleaned = fullPath.replace(/\\/g, "/");
     const parts = cleaned.split("/");
     return parts[parts.length - 1] || cleaned;

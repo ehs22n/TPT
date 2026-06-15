@@ -1,4 +1,5 @@
 import { BiCloudUpload } from "react-icons/bi";
+import type { ConverterPanelProps } from "../types";
 
 export default function ConverterPanel({
   selectedFolder,
@@ -13,7 +14,7 @@ export default function ConverterPanel({
   onSelectFolder,
   onOpenOutput,
   getFileName,
-}) {
+}: ConverterPanelProps) {
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_330px] gap-[14px] overflow-hidden p-[14px] max-[900px]:grid-cols-[minmax(0,1fr)_280px] max-[760px]:grid-cols-1">
       <section

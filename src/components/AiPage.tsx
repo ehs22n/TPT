@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { MenuIcon } from "./AppLayout";
+import type { AiPageProps } from "../types";
 
-export default function AiPage({ aiLogs }) {
+export default function AiPage({ aiLogs }: AiPageProps) {
   const models = [
     {
       value: "nllb-200-distilled-600M",
@@ -11,15 +12,15 @@ export default function AiPage({ aiLogs }) {
   ];
 
   const [selectedModel, setSelectedModel] = useState(models[0].value);
-  const [busy, setBusy] = useState("");
+  const [busy, setBusy] = useState<"" | "install" | "start">("");
   const [status, setStatus] = useState("مدل انتخاب‌شده آماده نصب است.");
 
-  async function handleInstall() {
+  async function handleInstall(): Promise<void> {
     setBusy("install");
     setStatus("در حال ساخت محیط مجازی، نصب کتابخانه‌ها و دانلود مدل...");
 
     try {
-      const result = await invoke("install_ai_model", { model: selectedModel });
+      const result = await invoke<string>("install_ai_model", { model: selectedModel });
       setStatus(result);
     } catch (err) {
       setStatus(String(err));
@@ -28,12 +29,12 @@ export default function AiPage({ aiLogs }) {
     }
   }
 
-  async function handleStart() {
+  async function handleStart(): Promise<void> {
     setBusy("start");
     setStatus("در حال آماده‌سازی محیط مجازی و راه‌اندازی FastAPI برای مدل انتخاب‌شده...");
 
     try {
-      const result = await invoke("start_ai_model", { model: selectedModel });
+      const result = await invoke<string>("start_ai_model", { model: selectedModel });
       setStatus(result);
     } catch (err) {
       setStatus(String(err));

@@ -1,6 +1,7 @@
 import { MenuIcon } from "./AppLayout";
+import type { HomePageProps, PlaceholderPageProps } from "../types";
 
-export default function HomePage({ onNavigate }) {
+export default function HomePage({ onNavigate }: HomePageProps) {
   return (
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_132px] gap-[14px] overflow-hidden p-[14px] max-[760px]:grid-rows-[minmax(0,1fr)_150px]">
       <section className="min-h-0 grid grid-cols-[minmax(0,1fr)_390px] items-stretch gap-[18px] border border-[var(--color-border)] rounded-[var(--radius-app-lg)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-panel)_82%,transparent),color-mix(in_srgb,var(--color-panel-2)_74%,transparent))] p-[clamp(18px,3vw,34px)] shadow-[var(--shadow-app)] max-[900px]:grid-cols-1 max-[900px]:p-[18px]">
@@ -60,7 +61,7 @@ export default function HomePage({ onNavigate }) {
   );
 }
 
-export function PlaceholderPage({ icon, title, description, items }) {
+export function PlaceholderPage({ icon, title, description, items }: PlaceholderPageProps) {
   return (
     <section className="flex min-h-0 flex-1 m-[14px] items-center justify-center overflow-hidden rounded-[var(--radius-app-lg)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-panel)_88%,transparent)] p-[18px] text-center shadow-[0_12px_34px_rgba(0,0,0,0.12)]">
       <div>

@@ -1,4 +1,4 @@
-import React from "react";
+import type { AppLayoutProps, MenuIconType } from "../types";
 import {
   BiHomeAlt,
   BiBrain,
@@ -14,7 +14,7 @@ export function AppLayout({
   onNavigate,
   children,
   menuItems,
-}) {
+}: AppLayoutProps) {
   return (
     <div className="relative h-dvh w-full grid grid-cols-[238px_minmax(0,1fr)] overflow-hidden bg-[radial-gradient(circle_at_18%_0%,rgba(129,140,248,0.2),transparent_34%),radial-gradient(circle_at_90%_18%,rgba(14,165,233,0.12),transparent_28%),var(--color-bg)] max-[900px]:grid-cols-[86px_minmax(0,1fr)] max-[760px]:grid-cols-[72px_minmax(0,1fr)]">
       <div className="pointer-events-none fixed z-0 h-[420px] w-[420px] rounded-full blur-[90px] opacity-[0.28] -top-[180px] left-[280px] bg-[rgba(99,102,241,0.55)]" />
@@ -106,7 +106,7 @@ function AppLogo() {
   );
 }
 
-export function MenuIcon({ type }) {
+export function MenuIcon({ type }: { type: MenuIconType }) {
   if (type === "dashboard") {
     return <BiHomeAlt size={22} aria-hidden="true" />;
   }

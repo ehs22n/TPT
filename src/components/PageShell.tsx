@@ -1,4 +1,6 @@
-export default function PageShell({ title, tagline, children }) {
+import type { PageShellProps } from "../types";
+
+export default function PageShell({ title, tagline, children }: PageShellProps) {
   return (
     <>
       {/* <header className="flex h-[72px] flex-none items-center justify-between gap-[18px] overflow-hidden border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-panel)_88%,transparent)] px-[16px] py-[12px] max-[760px]:flex-[0_0_64px]">

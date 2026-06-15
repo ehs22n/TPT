@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export default function TextToSpeechPage() {
   const [text, setText] = useState("");
-  const [voices, setVoices] = useState([]);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState("");
   const [speaking, setSpeaking] = useState(false);
   const [message, setMessage] = useState("");
