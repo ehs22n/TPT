@@ -1,3 +1,5 @@
+import { BiCloudUpload } from "react-icons/bi";
+
 export default function ConverterPanel({
   selectedFolder,
   outputPath,
@@ -22,11 +24,7 @@ export default function ConverterPanel({
       >
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex h-[54px] w-[54px] items-center justify-center rounded-[7px] bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
-            <svg width="30" height="30" viewBox="0 0 56 56" fill="none">
-              <rect x="8" y="12" width="40" height="32" rx="4" stroke="currentColor" strokeWidth="2" />
-              <path d="M8 28l12-12h24l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M20 36v-8a8 8 0 0116 0v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+            <BiCloudUpload size={30} aria-hidden="true" />
           </div>
           <span className="inline-flex h-fit w-fit items-center rounded-full border border-[var(--color-border-strong)] bg-[var(--color-primary-soft)] px-[10px] py-[6px] text-[0.68rem] font-[800] tracking-[0.08em] text-[var(--color-primary)]">{loading ? "Processing" : "Ready"}</span>
         </div>
