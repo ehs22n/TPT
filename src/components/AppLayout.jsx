@@ -21,7 +21,7 @@ export function AppLayout({
       <div className="pointer-events-none fixed z-0 h-[420px] w-[420px] rounded-full blur-[90px] opacity-[0.28] -right-[140px] -bottom-[160px] bg-[rgba(14,165,233,0.34)]" />
 
       <aside className="relative z-10 min-w-0 h-dvh flex flex-col gap-[14px] overflow-hidden border-r border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-panel)_92%,transparent)] p-[14px] shadow-[12px_0_40px_rgba(0,0,0,0.16)] max-[900px]:p-[10px]">
-        <div className="flex min-h-[56px] items-center gap-[10px] px-[8px] max-[900px]:hidden">
+        <div className="flex min-h-[56px]  items-center gap-[10px] px-[8px] max-[900px]:hidden">
           <AppLogo />
           <div>
             <strong className="block text-[0.82rem] leading-[1.25]">
@@ -41,7 +41,11 @@ export function AppLayout({
             <button
               key={item.id}
               type="button"
-              className={`grid h-[54px] grid-cols-[36px_minmax(0,1fr)] items-center gap-[10px] border border-transparent bg-transparent px-[12px] text-right text-[var(--color-text-secondary)] transition-[background-color,border-color,color] duration-[140ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-[var(--color-panel-3)] hover:text-[var(--color-text)] max-[900px]:grid-cols-[1fr] max-[900px]:justify-items-center max-[900px]:p-0 ${activePage === item.id ? "border-[var(--color-border-strong)] bg-[var(--color-primary-soft)] text-[var(--color-text)]" : ""}`}
+              className={`grid h-[54px] grid-cols-[36px_minmax(0,1fr)] items-center rounded-xl gap-[10px] border border-transparent px-[12px] text-right transition-[background-color,border-color,color] duration-[140ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-[var(--color-panel-3)] hover:text-[var(--color-text)] max-[900px]:grid-cols-[1fr] max-[900px]:justify-items-center max-[900px]:p-0 ${
+                activePage === item.id
+                  ? "border-[var(--color-border-strong)] bg-[var(--color-primary-soft)] text-[var(--color-text)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                  : "bg-transparent text-[var(--color-text-secondary)]"
+              }`}
               onClick={() => onNavigate(item.id)}
               title={item.title}
             >
@@ -66,9 +70,11 @@ export function AppLayout({
 
       <main className="relative z-10 min-w-0 h-dvh flex flex-col overflow-hidden">
         {children}
-        <footer className="flex h-[34px] flex-none justify-center  items-center gap-[8px] border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-panel)_88%,transparent)] px-[14px] text-[0.72rem] tracking-[0.08em] text-[var(--color-text-muted)]">
-          <strong className="">Made BY CipherUnit</strong>
-        </footer>
+        <div className="flex justify-center itam-center">
+          <footer className="flex w-[98%] mb-4 h-[34px] flex-none justify-center rounded-lg items-center gap-[8px] border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-panel)_88%,transparent)] px-[14px] text-[0.72rem] tracking-[0.08em] text-[var(--color-text-muted)]">
+            <a href="https://github.com/cipherunits" target="_blank" className="hover:underline cursor-pointer">Made BY CipherUnit</a>
+          </footer>
+        </div>
       </main>
     </div>
   );
