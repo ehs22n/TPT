@@ -2,7 +2,7 @@ import os
 import sys
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-MODEL_NAME = os.getenv("AI_MODEL", "facebook/nllb-200-distilled-600M")
+MODEL_NAME = "facebook/nllb-200-distilled-600M"
 
 
 def load_model():
