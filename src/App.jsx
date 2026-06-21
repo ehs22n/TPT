@@ -1,13 +1,12 @@
+import SplashScreen from "./SplashScreen";
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import "./App.css";
 
 const menuItems = [
   { id: "home", title: "داشبورد", icon: "dashboard" },
   { id: "converter", title: "تبدیل SRT", icon: "document" },
-  { id: "ai", title: "هوش مصنوعی", icon: "ai" },
   { id: "translate", title: "ترجمه", icon: "translate" },
   { id: "speech", title: "گفتار", icon: "speech" },
 ];
@@ -21,35 +20,20 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [aiLogs, setAiLogs] = useState([]);
-  const [aiProgress, setAiProgress] = useState(0);
 
   const [translateText, setTranslateText] = useState("");
   const [translateResult, setTranslateResult] = useState("");
-  const [translateMethod, setTranslateMethod] = useState("google");
   const [translateLoading, setTranslateLoading] = useState(false);
-  const [saveLoading, setSaveLoading] = useState(false);
+
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashComplete = useCallback(() => {
+    setShowSplash(false);
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
-
-  useEffect(() => {
-    let unlisten;
-    listen("ai-log", (event) => {
-      setAiLogs((current) => [...current.slice(-40), String(event.payload)]);
-    }).then((cleanup) => { unlisten = cleanup; });
-    return () => { if (unlisten) unlisten(); };
-  }, []);
-
-  useEffect(() => {
-    let unlisten;
-    listen("ai-progress", (event) => {
-      const value = Number(event.payload);
-      if (Number.isFinite(value)) setAiProgress(Math.max(0, Math.min(100, Math.round(value))));
-    }).then((cleanup) => { unlisten = cleanup; });
-    return () => { if (unlisten) unlisten(); };
-  }, []);
 
   const processFolder = async (folderPath) => {
     setLoading(true); setError(""); setOutputPath(""); setStats(null);
@@ -93,26 +77,10 @@ function App() {
     if (!translateText.trim()) { setError("لطفاً متن انگلیسی را وارد کنید."); return; }
     setTranslateLoading(true); setTranslateResult(""); setError("");
     try {
-      if (translateMethod === "ai") {
-        const result = await invoke("translate_with_ai", { text: translateText });
-        setTranslateResult(String(result));
-      } else {
-        const result = await invoke("translate_with_google", { text: translateText });
-        setTranslateResult(String(result));
-      }
+      const result = await invoke("translate_with_llama", { text: translateText });
+      setTranslateResult(String(result));
     } catch (err) { setError(String(err)); }
     finally { setTranslateLoading(false); }
-  };
-
-  const handleSaveTranslation = async () => {
-    if (!translateResult.trim()) { setError("متن ترجمه‌شده‌ای برای ذخیره وجود ندارد."); return; }
-    setSaveLoading(true); setError("");
-    try {
-      const savedPath = await invoke("save_translation_dialog", { text: translateResult });
-      setOutputPath(savedPath);
-      setStats({ folderName: savedPath.split(/[\\/]/).pop() || savedPath, outputPath: savedPath });
-    } catch (err) { setError(String(err)); }
-    finally { setSaveLoading(false); }
   };
 
   const handleTranslateFile = async () => {
@@ -120,7 +88,7 @@ function App() {
     try {
       const selected = await open({ multiple: false, title: "انتخاب فایل TXT یا SRT", filters: [{ name: "Text", extensions: ["txt", "srt"] }] });
       if (!selected) return;
-      const result = await invoke("translate_file", { filePath: selected, method: translateMethod });
+      const result = await invoke("translate_file_llama", { filePath: selected });
       setOutputPath(result);
       setStats({ folderName: selected.split(/[\\/]/).pop() || selected, outputPath: result });
     } catch (err) { setError(String(err)); }
@@ -132,7 +100,7 @@ function App() {
     try {
       const selected = await open({ directory: true, multiple: false, title: "انتخاب پوشه فایل‌های TXT/SRT" });
       if (!selected || Array.isArray(selected)) return;
-      const result = await invoke("translate_folder", { folderPath: selected, method: translateMethod });
+      const result = await invoke("translate_folder_llama", { folderPath: selected });
       setOutputPath(result);
       setStats({ folderName: selected.split(/[\\/]/).pop() || selected, outputPath: result });
     } catch (err) { setError(String(err)); }
@@ -158,22 +126,13 @@ function App() {
       );
     }
 
-    if (page === "ai") {
-      return (
-        <PageShell title="هوش مصنوعی" tagline="دانلود، نصب و راه‌اندازی مدل ترجمه NLLB">
-          <AiPage aiLogs={aiLogs} aiProgress={aiProgress} setAiProgress={setAiProgress} />
-        </PageShell>
-      );
-    }
-
     if (page === "translate") {
       return (
-        <PageShell title="ترجمه هوشمند" tagline="ترجمه متن انگلیسی به فارسی با هوش مصنوعی یا گوگل">
+        <PageShell title="ترجمه هوشمند" tagline="ترجمه متن انگلیسی به فارسی">
           <TranslatePage
-            text={translateText} result={translateResult} loading={translateLoading} method={translateMethod}
-            onTextChange={setTranslateText} onMethodChange={setTranslateMethod} onTranslate={handleTranslate}
+            text={translateText} result={translateResult} loading={translateLoading}
+            onTextChange={setTranslateText} onTranslate={handleTranslate}
             onTranslateFile={handleTranslateFile} onTranslateFolder={handleTranslateFolder}
-            onSaveTranslation={handleSaveTranslation} saveLoading={saveLoading}
             onOpenOutput={handleOpenOutput}
             outputPath={outputPath} stats={stats} error={error} getFileName={getFileName}
           />
@@ -190,6 +149,10 @@ function App() {
     }
 
     return <HomePage onNavigate={setPage} />;
+  }
+
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   return (
@@ -277,7 +240,7 @@ function HomePage({ onNavigate }) {
         <div className="feature-card" onClick={() => onNavigate("translate")}>
           <MenuIcon type="translate" />
           <h2>ترجمه هوشمند</h2>
-          <p>ترجمه متن با هوش مصنوعی یا گوگل</p>
+          <p>ترجمه متن با LLM محلی</p>
         </div>
         <div className="feature-card" onClick={() => onNavigate("speech")}>
           <MenuIcon type="speech" />
@@ -366,18 +329,50 @@ function ConverterPanel({
   );
 }
 
-function TranslatePage({ text, result, loading, method, onTextChange, onMethodChange, onTranslate, onTranslateFile, onTranslateFolder, onSaveTranslation, saveLoading, onOpenOutput, outputPath, stats, error, getFileName }) {
+function TranslatePage({ text, result, loading, onTextChange, onTranslate, onTranslateFile, onTranslateFolder, onOpenOutput, outputPath, stats, error, getFileName }) {
+  const [llamaStatus, setLlamaStatus] = useState("ناشناخته");
+  const [llamaLoading, setLlamaLoading] = useState(false);
+
+  const checkLlamaStatus = async () => {
+    setLlamaLoading(true);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const resp = await fetch("http://127.0.0.1:8080/health", { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (resp.ok) {
+        setLlamaStatus("آماده");
+      } else {
+        setLlamaStatus("غیرفعال");
+      }
+    } catch {
+      setLlamaStatus("غیرفعال");
+    } finally {
+      setLlamaLoading(false);
+    }
+  };
+
+  const startLlamaServer = async () => {
+    setLlamaLoading(true);
+    setLlamaStatus("در حال راه‌اندازی...");
+    try {
+      const result = await invoke("start_llama_server");
+      setLlamaStatus(String(result));
+      setTimeout(checkLlamaStatus, 3000);
+    } catch (err) {
+      setLlamaStatus(String(err));
+    } finally {
+      setLlamaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkLlamaStatus();
+  }, []);
+
   return (
     <div className="translate-layout">
       <section className="app-card translate-card">
-        <div className="translate-method-bar">
-          <label className="field-label">روش ترجمه:</label>
-          <div className="method-switch">
-            <button type="button" className={`method-btn ${method === "google" ? "active" : ""}`} onClick={() => onMethodChange("google")}>Google Translate</button>
-            <button type="button" className={`method-btn ${method === "ai" ? "active" : ""}`} onClick={() => onMethodChange("ai")}>هوش مصنوعی (NLLB)</button>
-          </div>
-        </div>
-
         <label htmlFor="translate-input" className="field-label">متن انگلیسی:</label>
         <textarea
           id="translate-input"
@@ -390,22 +385,27 @@ function TranslatePage({ text, result, loading, method, onTextChange, onMethodCh
         />
 
         <div className="actions">
-          <button type="button" className="btn btn-primary" onClick={onTranslate} disabled={loading || !text.trim()}>
+          <button type="button" className="btn btn-secondary" onClick={startLlamaServer} disabled={llamaLoading || llamaStatus === "آماده"}>
+            {llamaLoading ? "در حال راه‌اندازی..." : "راه‌اندازی سرور LLM"}
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={checkLlamaStatus} disabled={llamaLoading} style={{ marginLeft: "8px" }}>
+            {llamaLoading ? "..." : "چک وضعیت"}
+          </button>
+          <button type="button" className="btn btn-primary" onClick={onTranslate} disabled={loading || !text.trim() || llamaStatus !== "آماده"}>
             {loading ? <><span className="spinner" /><span>در حال ترجمه...</span></> : <><MenuIcon type="translate" /><span>ترجمه متن</span></>}
           </button>
 
-          {result && (
-            <button type="button" className="btn btn-secondary" onClick={onSaveTranslation} disabled={saveLoading}>
-              {saveLoading ? <><span className="spinner" /><span>در حال ذخیره...</span></> : <><MenuIcon type="document" /><span>ذخیره در فایل TXT</span></>}
-            </button>
-          )}
-
-          <button type="button" className="btn btn-secondary" onClick={onTranslateFile} disabled={loading}>
+          <button type="button" className="btn btn-secondary" onClick={onTranslateFile} disabled={loading || llamaStatus !== "آماده"}>
             <MenuIcon type="document" /><span>ترجمه فایل</span>
           </button>
-          <button type="button" className="btn btn-secondary" onClick={onTranslateFolder} disabled={loading}>
+          <button type="button" className="btn btn-secondary" onClick={onTranslateFolder} disabled={loading || llamaStatus !== "آماده"}>
             <MenuIcon type="folder" /><span>ترجمه پوشه</span>
           </button>
+        </div>
+
+        <div className="ai-status" style={{ marginTop: "12px" }}>
+          <span>وضعیت سرور LLM</span>
+          <strong>{llamaStatus}</strong>
         </div>
 
         {result && (
@@ -434,72 +434,6 @@ function TranslatePage({ text, result, loading, method, onTextChange, onMethodCh
         </div>
       )}
     </div>
-  );
-}
-
-function AiPage({ aiLogs, aiProgress, setAiProgress }) {
-  const models = [{ value: "nllb-200-distilled-600M", label: "NLLB 200 Distilled 600M" }];
-  const [selectedModel, setSelectedModel] = useState(models[0].value);
-  const [busy, setBusy] = useState("");
-  const [status, setStatus] = useState("مدل انتخاب‌شده آماده نصب است.");
-
-  const handleInstall = async () => {
-    setAiProgress(0); setBusy("install");
-    setStatus("در حال ساخت محیط مجازی، نصب کتابخانه‌ها و دانلود مدل...");
-    try { const result = await invoke("install_ai_model", { model: selectedModel }); setStatus(result); }
-    catch (err) { setStatus(String(err)); }
-    finally { setBusy(""); }
-  };
-
-  const handleStart = async () => {
-    setAiProgress(0); setBusy("start");
-    setStatus("در حال آماده‌سازی محیط مجازی و راه‌اندازی FastAPI...");
-    try { const result = await invoke("start_ai_model", { model: selectedModel }); setStatus(result); }
-    catch (err) { setStatus(String(err)); }
-    finally { setBusy(""); }
-  };
-
-  return (
-    <section className="page-card ai-panel">
-      <div className="ai-content">
-        <div className="ai-icon"><MenuIcon type="ai" /></div>
-        <h2>مدل هوش مصنوعی</h2>
-        <p>فعلاً فقط مدل NLLB 200 Distilled 600M در لیست فعال است.</p>
-
-        <label htmlFor="ai-model" className="field-label">انتخاب مدل</label>
-        <select id="ai-model" className="voice-select ai-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
-          {models.map((model) => <option key={model.value} value={model.value}>{model.label}</option>)}
-        </select>
-
-        <div className="actions ai-actions">
-          <button type="button" className="btn btn-primary" onClick={handleInstall} disabled={Boolean(busy)}>
-            {busy === "install" ? "در حال دانلود..." : "دانلود مدل"}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={handleStart} disabled={Boolean(busy)}>
-            راه‌اندازی FastAPI
-          </button>
-        </div>
-
-        <div className="ai-status">
-          <span>{busy ? "در حال اجرا..." : "وضعیت"}</span>
-          <strong>{status}</strong>
-        </div>
-
-        <div className="ai-progress">
-          <div className="ai-progress-meta"><span>پیشرفت</span><strong>{aiProgress}%</strong></div>
-          <div className="ai-progress-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={aiProgress}>
-            <div className="ai-progress-fill" style={{ width: `${aiProgress}%` }} />
-          </div>
-        </div>
-
-        <div className="ai-log">
-          <span>لاگ دانلود و نصب</span>
-          <div>
-            {aiLogs.length === 0 ? <p className="ai-log-empty">هنوز لاگی ثبت نشده.</p> : aiLogs.slice(-6).map((line, idx) => <p key={`${line}-${idx}`}>{line}</p>)}
-          </div>
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -579,9 +513,6 @@ function AppLogo() {
 function MenuIcon({ type }) {
   if (type === "dashboard") {
     return <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M4 13h8V4H4v9zm12 11h8V4h-8v20zM4 24h8v-7H4v7zm12-15h8v-5h-8v5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /></svg>;
-  }
-  if (type === "ai") {
-    return <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><path d="M14 3.5l2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8L14 3.5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /><path d="M8 20.5h12M10 24h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>;
   }
   if (type === "translate") {
     return <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><path d="M4 5h10M9 5c-.5 5-2.5 9-6 12M4 5c1.5 5 4 9 8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /><path d="M16 8h8M16 12h6M18 8l-4 10M20 13l4 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
